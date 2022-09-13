@@ -1,6 +1,6 @@
 __This is experimenting On FreeRTOS with Ubuntu__
 
-## Intall library
+## Install library
 ```
 $ sudo apt-get install libc6-dev-i386
 ```
