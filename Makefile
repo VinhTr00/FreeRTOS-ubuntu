@@ -58,7 +58,9 @@ C_FILES			+= port.c
 #
 # Main Object
 #C_FILES			+= queue_rxtx.c
-C_FILES			+= main.c
+C_FILES			+= Example1.c
+# C_FILES			+= Example2.c
+# C_FILES			+= Example3.c
 #C_FILES			+= taskfunction.c
 # Include Paths
 INCLUDES        += -I$(SRCROOT)/Source/include
