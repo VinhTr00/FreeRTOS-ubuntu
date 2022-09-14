@@ -25,7 +25,7 @@ void vReceiverTask(void *pvParameters);
 
 int main(void){
     xQueue1 = xQueueCreate(queueLength, sizeof(char *));
-    xQueue2 = xQueueCreate(queueLength, sizeof(char *));
+    xQueue2 = xQueueCreate(queueLength, sizeof(uint32_t));
 
     xQueueSet = xQueueCreateSet(sumQueueLength);
 
