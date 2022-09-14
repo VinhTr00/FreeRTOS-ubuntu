@@ -8,6 +8,9 @@
 #include "timers.h"
 #include "queue.h"
 
+#define queueLength 1
+#define sumQueueLength (queueLength*2)
+
 void vApplicationIdleHook(void);
 
 static QueueHandle_t xQueue1 = NULL, xQueue2 = NULL;
@@ -21,18 +24,18 @@ void vReceiverTask(void *pvParameters);
 
 
 int main(void){
-    xQueue1 = xQueueCreate(1, sizeof(char *));
-    xQueue2 = xQueueCreate(1, sizeof(char *));
+    xQueue1 = xQueueCreate(queueLength, sizeof(char *));
+    xQueue2 = xQueueCreate(queueLength, sizeof(char *));
 
-    xQueueSet = xQueueCreateSet(2);
+    xQueueSet = xQueueCreateSet(sumQueueLength);
 
     xQueueAddToSet(xQueue1, xQueueSet);
     xQueueAddToSet(xQueue2, xQueueSet);
 
-    xTaskCreate(vSenderTask1, "Sender1", 1000, NULL, 1, NULL);
-    xTaskCreate(vSenderTask2, "Sender2", 1000, NULL, 1, NULL);
+    xTaskCreate(vSenderTask1, "Sender1", 1000, NULL, 2, NULL);
+    xTaskCreate(vSenderTask2, "Sender2", 1000, NULL, 2, NULL);
 
-    xTaskCreate(vReceiverTask, "Receiver", 1000, NULL, 2, NULL);
+    xTaskCreate(vReceiverTask, "Receiver", 1000, NULL, 3, NULL);
     
     vTaskStartScheduler();
 
@@ -41,28 +44,39 @@ int main(void){
 }
 
 void vSenderTask1(void *pvParameters){
-    const char * const message = "Message from Sender 1.\r\n";
+    const char * message = "Message from Sender 1.\r\n";
     while (1){
-        // vTaskDelay(100);
         xQueueSendToBack(xQueue1, &message , 0);
     }
 }
 
 void vSenderTask2(void *pvParameters){
-    const char * const message = "Message from Sender 2.\r\n";
+    static uint32_t i = 0;
     while (1){
-        // vTaskDelay(200);
-        xQueueSendToBack(xQueue2, &message, 0);
+        xQueueSendToBack(xQueue2, &i, pdMS_TO_TICKS(10000));
+        i++;
     }
 }
 
 void vReceiverTask(void *pvParameters){
-    QueueHandle_t xQueueThatContainsData;
+    QueueSetMemberHandle_t xHandle;
     char *  messageReceived;
+    uint32_t valueReceived;
     while (1){
-        xQueueThatContainsData = (QueueHandle_t) xQueueSelectFromSet(xQueueSet, pdMS_TO_TICKS(100));
-        xQueueReceive(xQueueThatContainsData, &messageReceived, 0);
-        printf("Received: %s", messageReceived);
+        xHandle = xQueueSelectFromSet(xQueueSet, pdMS_TO_TICKS(10));
+        if (xHandle == NULL){
+            printf("Error\r\n");
+        }
+        else if (xHandle == (QueueSetMemberHandle_t) xQueue2)
+        {
+            xQueueReceive(xQueue2, &valueReceived, 0);
+            printf("Received: %d\r\n", valueReceived);
+        }
+        else if (xHandle == (QueueSetMemberHandle_t) xQueue1)
+        {
+            xQueueReceive(xQueue1, &messageReceived, 0);
+            printf("Received: %s\r\n", messageReceived);
+        }
     }
 }
 
