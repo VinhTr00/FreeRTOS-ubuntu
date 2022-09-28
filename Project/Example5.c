@@ -55,13 +55,13 @@ static void AutoReloadCallBack(TimerHandle_t xTimer){
 
 void vAssertCalled( unsigned long ulLine, const char * const pcFileName )
 {
- 	taskENTER_CRITICAL();
-	{
+    taskENTER_CRITICAL();
+    {
         printf("[ASSERT] %s:%lu\n", pcFileName, ulLine);
         fflush(stdout);
-	}
-	taskEXIT_CRITICAL();
-	exit(-1);
+    }
+    taskEXIT_CRITICAL();
+    exit(-1);
 }
 
 void vApplicationIdleHook(void)
